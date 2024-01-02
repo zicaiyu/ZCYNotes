@@ -80,7 +80,7 @@ evil.xml
 
 ### 基于XML格式的文件，比如DOCX文档、SVG图像等
 
-比如：头像上传处
+#### 比如：头像上传处
 
 svg文件payload
 
@@ -89,6 +89,52 @@ svg文件payload
     </svg>
     
 然后头像就可能显示出数据
+
+---
+
+#### 比如：在线阅读DOCX文档、网站在线解析DOCX文档等功能
+
+DOCX文档其实就是把一堆的XML文件按照一定的格式压缩在一起。
+
+只需要把DOCX文档的后缀改为ZIP，并解压出其中的文件，就可以清晰地看到DOCX文档的“真实面貌“。
+
+第一个回显位置：ord/document.xml文件中
+
+在
+
+    <?xml version.....>
+    
+的下方嵌入恶意代码
+
+    <!DOCTYPE HACK[<!ENTITY Hack SYSTEM 'file:///etc/passwd'>]>
+    
+随后将这个压缩包的后缀名修改为DOCX，就得到了一个用于XXE攻击的DOCX文档
+
+第二个回显位置：docProps/app.xml
+
+找到控制页码的标签是<Pages>
+
+    <Pages>1</Pages>
+    
+修改为
+
+    <Pages><!DOCTYPE HACK[<!ENTITY Hack SYSTEM 'file:///etc/passwd'>]></Pages>
+    
+随后将这个压缩包的后缀名修改为DOCX，就得到了一个用于XXE攻击的DOCX文档
+
+---
+
+#### 比如：Excel文件
+
+与上面的DOCX文件类似
+
+把xlxs文档后缀改为zip，找到xl/workbook.xml文件
+
+    <?xml version ....>
+
+下方添加恶意代码
+
+将压缩包后缀重新改回xlxs文件即可得到一个恶意Excel文件。
 
 ### 修改请求包内容类型
 
