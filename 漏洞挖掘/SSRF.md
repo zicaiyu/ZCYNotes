@@ -2,12 +2,21 @@
 
 ## 漏洞成因：
 
-web服务器经常需要从别的服务器获取数据，比如文件载入、图片拉取、图片识别等功能，如果获取数据的服务器地址可控，攻击者就可以通过web服务器自定义向别的服务器发出请求。因为web服务器常搭建在DMZ区域，因此常被攻击者当作跳板，向内网服务器发出请求。
+web服务器经常需要从别的服务器获取数据，比如文件载入、图片拉取、图片识别等功能，
+
+如果获取数据的服务器地址可控，攻击者就可以通过web服务器自定义向别的服务器发出请求。
+
+因为web服务器常搭建在DMZ区域，因此常被攻击者当作跳板，向内网服务器发出请求。
+
 > DMZ区域
 >
-> DMZ（Demilitarized Zone）是网络安全中的一个术语，它指的是位于内部网络和外部网络之间的一个隔离区域。DMZ提供了一个额外的安全层，用于分离和保护内部网络中的敏感系统和数据免受来自外部网络的攻击。
+> DMZ（Demilitarized Zone）是网络安全中的一个术语，它指的是位于内部网络和外部网络之间的一个隔离区域。
 >
-> 在一个典型的网络架构中，DMZ通常位于防火墙内部，同时连接着外部网络和内部网络。DMZ中放置了一些对外服务，如Web服务器、邮件服务器等。这些对外服务需要与外部网络进行通信，但又不能直接接触内部网络中的敏感系统和数据。
+>DMZ提供了一个额外的安全层，用于分离和保护内部网络中的敏感系统和数据免受来自外部网络的攻击。
+>
+> 在一个典型的网络架构中，DMZ通常位于防火墙内部，同时连接着外部网络和内部网络。
+>
+> DMZ中放置了一些对外服务，如Web服务器、邮件服务器等。这些对外服务需要与外部网络进行通信，但又不能直接接触内部网络中的敏感系统和数据。
 
 ## 协议
 
@@ -33,9 +42,31 @@ ssrf常用的协议：http/https、dict、file、gopher、sftp、ldap、tftp
 
 ### gopher
 
-#### 利用gopher协议发送POST请求
+> Gopher是Internet上非常有名的信息查找系统，它将Internet上的文件组织成某种索引，很方便将用户从Internet的一处带到另一处。
+>
+> 但WWW出现以后，就很少使用Gopher了
 
-参考：https://blog.csdn.net/weixin_45887311/article/details/107327706
+#### gopher使用限制
+
+    PHP     --write-curlwrappers且php版本至少为5.3
+    
+    Java    小于JDK1.7
+    
+    Curl    低版本不支持
+    
+    Perl    支持
+    
+    ASP.NET 小于版本3
+
+#### 格式
+
+    gopher://<host>:<port>/<path>_后接TCP数据流
+    
+> gopher默认端口是70
+>
+> 如果发起post请求，回车换行需要使用%0d%0a，如果多个参数，参数之间的&也需要进行URL编码
+
+#### 利用gopher协议发送POST请求
 
 脚本举例
 
@@ -43,6 +74,10 @@ ssrf常用的协议：http/https、dict、file、gopher、sftp、ldap、tftp
     test =\
     """POST / HTTP/1.1
     Host: 127.0.0.1:8000
+    Content-Typr: application/x-www-form-urlencoded
+    Content-Length: 11
+    
+    name=xxx
     """  
     #以上内容放置请求包内容，注意后面一定要有回车，回车结尾表示http请求结束
     tmp = urllib.parse.quote(test)
@@ -51,6 +86,7 @@ ssrf常用的协议：http/https、dict、file、gopher、sftp、ldap、tftp
     print(result)
 
 除了发出HTTP请求外，gopher协议还常被用来攻击内网redis、Zabbix、FastCGI、mysql等服务
+
 利用工具：
 
     https://github.com/tarunkant/Gopherus
@@ -68,7 +104,9 @@ ssrf漏洞可分为有回显型和无回显型
 
 ### 回显型
 
-有回显型ssrf可以直接通过页面加载出目标资产，可先尝试加载http://www.baidu.com 页面确认有ssrf，如果成功的话，可进一步将百度换成内网IP，通过fuzz扫描内网资产。
+有回显型ssrf可以直接通过页面加载出目标资产，可先尝试加载http://www.baidu.com 页面确认有ssrf，
+
+如果成功的话，可进一步将百度换成内网IP，通过fuzz扫描内网资产。
 
 #### 场景
 
@@ -86,7 +124,7 @@ svg攻击payload
 
 我们将html内容修改为
 
-    svg><iframe src="攻击者服务器ip" width="800" height="850"/></svg>
+    <svg><iframe src="攻击者服务器ip" width="800" height="850"/></svg>
     
 通过攻击者服务器进行302重定向
 
@@ -108,8 +146,11 @@ svg攻击payload
 ### 无回显型
 
 无回显型ssrf的检测需要先配合dnslog平台，测试dnslog平台能否获取到服务器的访问记录，如果没有对应记录，也可能是服务器不出网造成的，
+
 利用时可以通过请求响应时间判断内网资产是否存在，
+
 然后再利用内网资产漏洞（比如redis以及常见可RCE的web框架）证明漏洞的有效性。
+
 或者可以尝试寻找内网的Confluence, Jenkins等资产，这篇文章是专门介绍bind ssrf利用技巧的，可以作为参考：
 
     https://github.com/assetnote/blind-ssrf-chains

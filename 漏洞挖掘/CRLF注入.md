@@ -1,30 +1,36 @@
 # CRLF注入
 
-工具：[CRLFsuite](https://github.com/Nefcore/CRLFsuite)
+> 工具：[CRLFsuite](https://github.com/Nefcore/CRLFsuite)
 
-测试是否存在CRLF注入所使用的符号
+## 漏洞成因
 
-\r\n
+Web应用程序中根据用户输入构造HTTP响应或重定向URL的位置。这些位置没有对用户输入进行充分的验证和过滤，而是直接将用户输入的内容拼接到HTTP响应或URL中。
 
-%0D%0A
+## 测试是否存在CRLF注入所使用的符号
 
-%0D或%0A
+(1) \r\n
 
-回车换行符的ASCII符号，例如0x0D0x0A
+(2) %0D%0A
 
-回车换行符的utf-8，例如 %E5%98%8A%E5%98%8D
+(3) %0D或%0A
+
+(4) 回车换行符的ASCII符号，例如0x0D0x0A
+
+(5) 回车换行符的utf-8，例如 %E5%98%8A%E5%98%8D
+
 > 原理
 > %E5%98%8A经过Unicode解码变为U+560A，去除无用字符后最后取0A
 >
 > %E5%98%8D同理
 
-回车换行符的Unicode，例如 \u560d\u560a
+(6) 回车换行符的Unicode，例如 \u560d\u560a
 
-注入大量字符串，例如 +++++++ 7000 bytes +++++++
+(7) 注入大量字符串，例如 +++++++ 7000 bytes +++++++
 
-编过码的回车或者换行,例如: %3F%0D , %23%0D , %3F%0A 或者 %23%0A
+(8) 编过码的回车或者换行,例如: %3F%0D , %23%0D , %3F%0A 或者 %23%0A
 
-/x:1/:///%01javascript:alert(document.cookie)/
+(9) /x:1/:///%01javascript:alert(document.cookie)/
+
 > 原理
 > 
 > /x:1/：这是一个无效的URL协议，它被用来欺骗浏览器，使其认为这是一个合法的URL。

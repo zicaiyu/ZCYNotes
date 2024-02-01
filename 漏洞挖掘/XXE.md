@@ -1,8 +1,8 @@
 # XXE
 
-XXE(XML External Entity Injection) 全称为 XML 外部实体注入，从名字就能看出来，这是一个注入漏洞，注入的是什么？XML外部实体。(看到这里肯定有人要说：你这不是在废话)，固然，其实我这里废话只是想强调我们的利用点是 外部实体 ，也是提醒读者将注意力集中于外部实体中，而不要被 XML 中其他的一些名字相似的东西扰乱了思维(盯好外部实体就行了)，如果能注入 外部实体并且成功解析的话，这就会大大拓宽我们 XML 注入的攻击面
+XXE(XML External Entity Injection) 全称为 XML 外部实体注入，从名字就能看出来，这是一个注入漏洞，注入的是XML外部实体。
 
-## payload
+## XXE类型
 
 ### 有回显
 
@@ -76,7 +76,7 @@ evil.xml
     <xi:include parse="text" href="file:///etc/passwd"/>
     </foo>
     
-将payload替换库存的id
+将上述payload替换库存的id
 
 ### 基于XML格式的文件，比如DOCX文档、SVG图像等
 
