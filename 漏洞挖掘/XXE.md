@@ -1,6 +1,8 @@
 # XXE
 
-XXE(XML External Entity Injection) 全称为 XML 外部实体注入，从名字就能看出来，这是一个注入漏洞，注入的是XML外部实体。
+XXE全称为 XML 外部实体注入，XXE漏洞存在于使用XML解析器的应用程序中。
+
+攻击者可以利用这种漏洞向应用程序发送恶意的XML输入，从而导致敏感信息泄露、服务器端请求伪造（SSRF）等安全问题。
 
 ## XXE类型
 

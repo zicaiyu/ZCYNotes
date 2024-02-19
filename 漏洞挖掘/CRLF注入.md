@@ -1,5 +1,7 @@
 # CRLF注入
 
+CLRF注入通常发生在用户输入被直接用于构造HTTP响应的情况下。攻击者利用这种漏洞，在HTTP响应中插入换行符和回车符，以执行恶意操作或欺骗用户。
+
 > 工具：[CRLFsuite](https://github.com/Nefcore/CRLFsuite)
 
 ## 漏洞成因
